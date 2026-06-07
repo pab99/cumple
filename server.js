@@ -79,7 +79,7 @@ async function uploadToSupabase(buffer, filename, usuarioIg) {
     console.log('☁️ Supabase storage OK:', data.publicUrl);
 
     // INSERT EN DB
-    const { error: dbError } = await supabase.from('fotos_mineros').insert([
+    const { error: dbError } = await supabase.from('fotos_invitados').insert([
       {
         usuario_ig: usuarioIg,
         filename: filename,
@@ -176,7 +176,7 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/api/fotos') {
     (async () => {
       const { data, error } = await supabase
-        .from('fotos_mineros')
+        .from('fotos_invitados')
         .select('public_url, usuario_ig, filename')
         .eq('oculta', false)
         .order('id', { ascending: false })
@@ -199,7 +199,7 @@ const server = http.createServer((req, res) => {
   if (req.method === 'GET' && req.url === '/api/dashboard') {
     (async () => {
       const { data, error } = await supabase
-        .from('fotos_mineros')
+        .from('fotos_invitados')
         .select('id, usuario_ig, filename, public_url, descargas, oculta, created_at, evento')
         .order('id', { ascending: false })
         .limit(1000);
@@ -232,7 +232,7 @@ const server = http.createServer((req, res) => {
 
         // Solo oculta si el usuario_ig coincide — evita borrados cruzados
         const { error } = await supabase
-          .from('fotos_mineros')
+          .from('fotos_invitados')
           .update({ oculta: true })
           .eq('public_url', public_url)
           .eq('usuario_ig', usuario_ig);
@@ -265,14 +265,14 @@ const server = http.createServer((req, res) => {
 
         // Incrementar contador en la fila correspondiente
         const { data: foto } = await supabase
-          .from('fotos_mineros')
+          .from('fotos_invitados')
           .select('id, descargas')
           .eq('public_url', public_url)
           .single();
 
         if (foto) {
           await supabase
-            .from('fotos_mineros')
+            .from('fotos_invitados')
             .update({ descargas: (foto.descargas || 0) + 1 })
             .eq('id', foto.id);
         }
@@ -311,7 +311,7 @@ const server = http.createServer((req, res) => {
 
     (async () => {
       const { data, error } = await supabase
-        .from('fotos_mineros')
+        .from('fotos_invitados')
         .select('public_url, usuario_ig, filename')
         .eq('usuario_ig', ig)
         .eq('oculta', false)
@@ -355,6 +355,6 @@ const server = http.createServer((req, res) => {
 // START
 // =========================
 server.listen(PORT, () => {
-  console.log('⛏️ CataMiner@s OK');
+  console.log('⛏️ Cumple Don Osvaldo@s OK');
   console.log('→ Puerto:', PORT);
 });

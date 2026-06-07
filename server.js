@@ -5,6 +5,7 @@ const url = require('url');
 const { createClient } = require('@supabase/supabase-js');
 
 const PORT = process.env.PORT || 8080;
+console.log('SUPABASE KEY:', !!process.env.SUPABASE_SERVICE_ROLE_KEY);
 const PHOTOS = path.join(__dirname, 'fotos');
 
 if (!fs.existsSync(PHOTOS)) {
@@ -86,7 +87,7 @@ async function uploadToSupabase(buffer, filename, usuarioIg) {
         storage_path: remotePath,
         public_url: data.publicUrl,
         device_info: '',
-        evento: 'cataminers_2026'
+        evento: 'cumple_don_osvaldo_2026'
       }
     ]);
 
@@ -170,28 +171,66 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  // =========================
-  // API: GALERÍA (para led.html)
-  // =========================
-  if (req.method === 'GET' && req.url === '/api/fotos') {
-    (async () => {
+// =========================
+// API: GALERÍA (para led.html)
+// =========================
+if (req.method === 'GET' && req.url === '/api/fotos') {
+
+  (async () => {
+
+    try {
+
       const { data, error } = await supabase
         .from('fotos_invitados')
         .select('public_url, usuario_ig, filename')
-        .eq('oculta', false)
         .order('id', { ascending: false })
         .limit(100);
 
       if (error) {
-        res.writeHead(500, { 'Content-Type': 'application/json' });
-        return res.end(JSON.stringify({ ok: false, error: error.message }));
+
+        console.error('❌ API /api/fotos ERROR');
+        console.error(error);
+
+        res.writeHead(500, {
+          'Content-Type': 'application/json'
+        });
+
+        return res.end(JSON.stringify({
+          ok: false,
+          error: error.message
+        }));
       }
 
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ ok: true, fotos: data || [] }));
-    })();
-    return;
-  }
+      console.log('📸 Fotos enviadas:', data?.length || 0);
+
+      res.writeHead(200, {
+        'Content-Type': 'application/json'
+      });
+
+      return res.end(JSON.stringify({
+        ok: true,
+        fotos: data || []
+      }));
+
+    } catch (e) {
+
+      console.error('❌ API /api/fotos EXCEPTION');
+      console.error(e);
+
+      res.writeHead(500, {
+        'Content-Type': 'application/json'
+      });
+
+      return res.end(JSON.stringify({
+        ok: false,
+        error: String(e)
+      }));
+    }
+
+  })();
+
+  return;
+}
 
   // =========================
   // API: DASHBOARD (todas las fotos, sin filtro oculta)
@@ -281,7 +320,7 @@ const server = http.createServer((req, res) => {
         await supabase.from('eventos_descarga').insert([{
           usuario_ig: usuario_ig || '',
           public_url: public_url,
-          evento: 'cataminers_2026'
+          evento: 'cumple_don_osvaldo_2026'
         }]);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });

@@ -80,14 +80,14 @@ async function uploadToSupabase(buffer, filename, usuarioIg) {
     console.log('☁️ Supabase storage OK:', data.publicUrl);
 
     // INSERT EN DB
-    const { error: dbError } = await supabase.from('fotos_invitados').insert([
+    const { error: dbError } = await supabase.from('fotos_mineros').insert([
       {
         usuario_ig: usuarioIg,
         filename: filename,
         storage_path: remotePath,
         public_url: data.publicUrl,
         device_info: '',
-        evento: 'cumple_don_osvaldo_2026'
+        evento: 'cataminers_2026'
       }
     ]);
 
@@ -181,7 +181,7 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
     try {
 
       const { data, error } = await supabase
-        .from('fotos_invitados')
+        .from('fotos_mineros')
         .select('public_url, usuario_ig, filename')
         .order('id', { ascending: false })
         .limit(100);
@@ -238,7 +238,7 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
   if (req.method === 'GET' && req.url === '/api/dashboard') {
     (async () => {
       const { data, error } = await supabase
-        .from('fotos_invitados')
+        .from('fotos_mineros')
         .select('id, usuario_ig, filename, public_url, descargas, oculta, created_at, evento')
         .order('id', { ascending: false })
         .limit(1000);
@@ -271,7 +271,7 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
 
         // Solo oculta si el usuario_ig coincide — evita borrados cruzados
         const { error } = await supabase
-          .from('fotos_invitados')
+          .from('fotos_mineros')
           .update({ oculta: true })
           .eq('public_url', public_url)
           .eq('usuario_ig', usuario_ig);
@@ -304,14 +304,14 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
 
         // Incrementar contador en la fila correspondiente
         const { data: foto } = await supabase
-          .from('fotos_invitados')
+          .from('fotos_mineros')
           .select('id, descargas')
           .eq('public_url', public_url)
           .single();
 
         if (foto) {
           await supabase
-            .from('fotos_invitados')
+            .from('fotos_mineros')
             .update({ descargas: (foto.descargas || 0) + 1 })
             .eq('id', foto.id);
         }
@@ -320,7 +320,7 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
         await supabase.from('eventos_descarga').insert([{
           usuario_ig: usuario_ig || '',
           public_url: public_url,
-          evento: 'cumple_don_osvaldo_2026'
+          evento: 'cataminers_2026'
         }]);
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
@@ -350,7 +350,7 @@ if (req.method === 'GET' && req.url === '/api/fotos') {
 
     (async () => {
       const { data, error } = await supabase
-        .from('fotos_invitados')
+        .from('fotos_mineros')
         .select('public_url, usuario_ig, filename')
         .eq('usuario_ig', ig)
         .eq('oculta', false)
